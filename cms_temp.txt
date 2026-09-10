@@ -1,0 +1,274 @@
+import React, { useState, useEffect } from 'react';
+import { SiteSettings } from '../../types.js';
+import {
+  FileText,
+  Save,
+  RefreshCw,
+  Layout,
+  Type,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  MessageSquare,
+  AlertCircle,
+  Megaphone,
+  CreditCard,
+  Zap,
+  Truck,
+  Eye,
+  CheckCircle2,
+} from 'lucide-react';
+
+interface CmsTabProps {
+  settings: SiteSettings | null;
+  token: string;
+  onSaveSettings: (updated: SiteSettings) => Promise<void>;
+  showToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
+}
+
+export const CmsTab: React.FC<CmsTabProps> = ({
+  settings,
+  token,
+  onSaveSettings,
+  showToast,
+}) => {
+  const [form, setForm] = useState<SiteSettings | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (settings) {
+      setForm(JSON.parse(JSON.stringify(settings)));
+    }
+  }, [settings]);
+
+  if (!form) {
+    return (
+      <div className="p-12 text-center text-neutral-500">
+        <RefreshCw className="w-6 h-6 mx-auto animate-spin mb-2" />
+        <p className="text-xs">جاري تحميل إعدادات المحتوى والنصوص...</p>
+      </div>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form) return;
+    setIsSaving(true);
+    try {
+      await onSaveSettings(form);
+    } catch {
+      showToast('تعذر حفظ النصوص', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const updateCms = (key: keyof SiteSettings['cms'], value: any) => {
+    setForm(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        cms: {
+          ...prev.cms,
+          [key]: value
+        }
+      };
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in duration-200">
+      <div className="bg-[#120205] text-white p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-white" />
+            <h2 className="font-bold text-base text-white">محرر المحتوى والنصوص الفوري (Storefront CMS Engine)</h2>
+          </div>
+          <p className="text-xs text-neutral-300">
+            تحكم كامل في كافة النصوص، الروابط، الصور، والأقسام عبر المتجر بدون الحاجة لأي برمجة.
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="px-6 py-2.5 bg-white text-[#120205] hover:bg-neutral-100 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+        >
+          <Save className="w-4 h-4" />
+          <span>{isSaving ? 'جاري الحفظ...' : 'حفظ ونشر التعديلات فورياً'}</span>
+        </button>
+      </div>
+
+      {/* A. HEADER & NAVIGATION CONTROL */}
+      <div className="bg-white border border-neutral-300 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center gap-2 border-b border-neutral-200 pb-3">
+          <Layout className="w-4 h-4 text-[#120205]" />
+          <h3 className="font-bold text-sm text-[#120205]">1. الهيدر وشريط الإعلانات العلوية والروابط (Header & Nav)</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-xs font-bold text-neutral-700 mb-1">شريط الإعلانات العلوي (Announcement Bar)</label>
+            <textarea
+              rows={2}
+              value={form.cms.announcementBarTextAr || ''}
+              onChange={(e) => updateCms('announcementBarTextAr', e.target.value)}
+              className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="checkbox" checked={form.cms.announcementBarActive} onChange={(e) => updateCms('announcementBarActive', e.target.checked)} className="w-4 h-4" />
+            <span className="text-xs font-bold">تفعيل شريط الإعلانات</span>
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">لون خلفية الشريط</label>
+            <input type="color" value={form.cms.announcementBarBgColor || '#120205'} onChange={(e) => updateCms('announcementBarBgColor', e.target.value)} className="w-full h-8 cursor-pointer rounded-xl" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">اسم المتجر (بالعربي)</label>
+            <input type="text" value={form.cms.siteNameAr || ''} onChange={(e) => updateCms('siteNameAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">اسم المتجر (بالإنجليزي)</label>
+            <input type="text" value={form.cms.siteNameEn || ''} onChange={(e) => updateCms('siteNameEn', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">وصف/شعار المتجر (Tagline)</label>
+            <input type="text" value={form.cms.siteTaglineAr || ''} onChange={(e) => updateCms('siteTaglineAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">رابط الشعار (Logo Image URL)</label>
+            <input type="text" value={form.cms.logoImageUrl || ''} onChange={(e) => updateCms('logoImageUrl', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+          </div>
+        </div>
+      </div>
+
+      {/* B. HERO & BANNER SECTION CONTROL */}
+      <div className="bg-white border border-neutral-300 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center gap-2 border-b border-neutral-200 pb-3">
+          <ImageIcon className="w-4 h-4 text-[#120205]" />
+          <h3 className="font-bold text-sm text-[#120205]">2. الواجهة الرئيسية والبانرات (Hero & Banners)</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold mb-1">عنوان الواجهة الرئيسي</label>
+            <input type="text" value={form.cms.heroTitleAr || ''} onChange={(e) => updateCms('heroTitleAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">العنوان الفرعي</label>
+            <input type="text" value={form.cms.heroSubtitleAr || ''} onChange={(e) => updateCms('heroSubtitleAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs font-bold mb-1">الوصف أسفل العنوان</label>
+            <textarea rows={2} value={form.cms.heroDescriptionAr || ''} onChange={(e) => updateCms('heroDescriptionAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">نص زر الإجراء (CTA)</label>
+            <input type="text" value={form.cms.heroCtaButtonTextAr || ''} onChange={(e) => updateCms('heroCtaButtonTextAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">رابط زر الإجراء (CTA URL)</label>
+            <input type="text" value={form.cms.heroCtaButtonUrl || ''} onChange={(e) => updateCms('heroCtaButtonUrl', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">رابط صورة/فيديو الخلفية</label>
+            <input type="text" value={form.cms.heroBgImageUrl || ''} onChange={(e) => updateCms('heroBgImageUrl', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">تعتيم الخلفية (%)</label>
+            <input type="number" value={form.cms.heroOverlayOpacity || 0} onChange={(e) => updateCms('heroOverlayOpacity', Number(e.target.value))} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" min={0} max={100} />
+          </div>
+          <div className="md:col-span-2 pt-4 border-t border-neutral-100">
+            <div className="flex items-center gap-2 mb-2">
+              <input type="checkbox" checked={form.cms.promoBannerActive} onChange={(e) => updateCms('promoBannerActive', e.target.checked)} className="w-4 h-4" />
+              <span className="text-xs font-bold">تفعيل البانر الترويجي الإضافي</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div>
+                 <label className="block text-xs font-bold mb-1">نص البانر الترويجي</label>
+                 <input type="text" value={form.cms.promoBannerText || ''} onChange={(e) => updateCms('promoBannerText', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+               </div>
+               <div>
+                 <label className="block text-xs font-bold mb-1">رابط صورة البانر (اختياري)</label>
+                 <input type="text" value={form.cms.promoBannerImageUrl || ''} onChange={(e) => updateCms('promoBannerImageUrl', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* C. FOOTER & GLOBAL INFORMATION CONTROL */}
+      <div className="bg-white border border-neutral-300 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center gap-2 border-b border-neutral-200 pb-3">
+          <LinkIcon className="w-4 h-4 text-[#120205]" />
+          <h3 className="font-bold text-sm text-[#120205]">3. الفوتر وروابط التواصل والسياسات (Footer & Links)</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-xs font-bold mb-1">وصف الفوتر القصير (Bio)</label>
+            <textarea rows={2} value={form.cms.footerDescriptionAr || ''} onChange={(e) => updateCms('footerDescriptionAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">نص حقوق النشر (Copyright)</label>
+            <input type="text" value={form.cms.footerCopyrightText || ''} onChange={(e) => updateCms('footerCopyrightText', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">رقم الواتساب</label>
+            <input type="text" value={form.cms.contactWhatsApp || ''} onChange={(e) => updateCms('contactWhatsApp', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">رابط إنستغرام (Instagram URL)</label>
+            <input type="text" value={form.cms.socialInstagramUrl || ''} onChange={(e) => updateCms('socialInstagramUrl', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">رابط تيك توك (TikTok URL)</label>
+            <input type="text" value={form.cms.socialTikTokUrl || ''} onChange={(e) => updateCms('socialTikTokUrl', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">رابط الشروط والأحكام (Terms)</label>
+            <input type="text" value={form.cms.policyTermsUrl || ''} onChange={(e) => updateCms('policyTermsUrl', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">رابط سياسة الخصوصية (Privacy)</label>
+            <input type="text" value={form.cms.policyPrivacyUrl || ''} onChange={(e) => updateCms('policyPrivacyUrl', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs font-mono" />
+          </div>
+          <div className="flex items-center gap-2 md:col-span-2 pt-2">
+            <input type="checkbox" checked={form.cms.paymentBadgesActive} onChange={(e) => updateCms('paymentBadgesActive', e.target.checked)} className="w-4 h-4" />
+            <span className="text-xs font-bold">إظهار شعارات الدفع الآمن والثقة (Trust Badges)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* D. DYNAMIC SECTION & TEXT MANAGEMENT */}
+      <div className="bg-white border border-neutral-300 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center gap-2 border-b border-neutral-200 pb-3">
+          <Type className="w-4 h-4 text-[#120205]" />
+          <h3 className="font-bold text-sm text-[#120205]">4. عناوين الأقسام الرئيسية بالصفحة (Section Headers)</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold mb-1">عنوان قسم التشكيلة (Featured)</label>
+            <input type="text" value={form.cms.sectionFeaturedTitleAr || ''} onChange={(e) => updateCms('sectionFeaturedTitleAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">عنوان قسم الفئات (Categories)</label>
+            <input type="text" value={form.cms.sectionCategoriesTitleAr || ''} onChange={(e) => updateCms('sectionCategoriesTitleAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1">عنوان دليل المقاسات (Size Guide)</label>
+            <input type="text" value={form.cms.sectionSizeGuideTitleAr || ''} onChange={(e) => updateCms('sectionSizeGuideTitleAr', e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-xl text-xs" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end pt-4">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="px-8 py-3 bg-[#120205] hover:bg-[#3B020D] text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+        >
+          <Save className="w-4 h-4" />
+          <span>{isSaving ? 'جاري الحفظ...' : 'حفظ وتحديث المحتوى في المتجر'}</span>
+        </button>
+      </div>
+    </form>
+  );
+};

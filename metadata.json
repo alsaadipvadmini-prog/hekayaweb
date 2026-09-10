@@ -1,0 +1,6 @@
+{
+  "name": "حكاية | HKAYA",
+  "description": "منصة التجارة الإلكترونية الفاخرة للأزياء والموضة الأنيقة في الأردن - كولكشنات حصرية وتوصيل سريع",
+  "requestFramePermissions": ["geolocation", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

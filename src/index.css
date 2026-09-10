@@ -1,0 +1,204 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@600;700&family=Readex+Pro:wght@500;600;700&family=Syne:wght@600;700&family=Montserrat:wght@600;700&display=swap');
+
+@font-face {
+  font-family: 'Megarin';
+  src: url('https://fonts.cdnfonts.com/s/96324/Megarin.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gumela Arabic';
+  src: url('https://fonts.cdnfonts.com/s/96325/GumelaArabic.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+
+* {
+  font-family: 'Megarin', 'Gumela Arabic', 'Readex Pro', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+*:lang(ar), [dir="rtl"], .arabic-text {
+  font-family: 'Gumela Arabic', 'GumelaArabic', 'Readex Pro', 'Almarai', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+*:lang(en), [dir="ltr"], .english-text {
+  font-family: 'Megarin', 'Syne', 'Montserrat', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+@layer base {
+  :root {
+    --bg-main: #ffffff;
+    --card-bg: #f8f9fa;
+    --text-main: #111111;
+    --accent: #3a080d;
+  }
+
+  html, body, #root {
+    background-color: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  body {
+    font-family: 'Megarin', 'Gumela Arabic', 'Readex Pro', sans-serif;
+    background-color: #ffffff;
+    color: #111111;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-overflow-scrolling: touch;
+    font-weight: 600;
+  }
+
+  /* Prevent awkward text selection on interactive mobile app elements */
+  button, a, input[type="button"], input[type="submit"], .interactive-badge {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Native Mobile Safe Area Inset Helpers */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0.5rem);
+}
+
+/* Native Mobile Bottom Sheet Transition & Handle */
+.bottom-sheet-container {
+  max-height: calc(100dvh - 3rem);
+  overscroll-behavior: contain;
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up-sheet {
+  animation: slideUpSheet 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom font styling */
+.font-luxury {
+  font-family: 'Gumela Arabic', 'Megarin', 'Readex Pro', sans-serif;
+  font-weight: 600;
+}
+
+.font-italic-luxury {
+  font-family: 'Megarin', 'Gumela Arabic', 'Readex Pro', sans-serif;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.font-display {
+  font-family: 'Gumela Arabic', 'Megarin', 'Readex Pro', sans-serif;
+  font-weight: 600;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Printable AWB shipping label styles */
+@media print {
+  @page {
+    size: auto;
+    margin: 8mm;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 100% !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  /* Unhide dynamic print portal and modal printable sheet */
+  #printable-awb-portal,
+  #printable-awb-portal *,
+  #awb-modal-overlay,
+  #awb-modal-container,
+  #printable-awb-sheet,
+  #printable-awb-sheet * {
+    visibility: visible !important;
+  }
+
+  #printable-awb-portal {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  #awb-modal-overlay {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    inset: auto !important;
+    backdrop-filter: none !important;
+  }
+
+  #awb-modal-container {
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  #printable-awb-sheet {
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 8px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    display: block !important;
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
