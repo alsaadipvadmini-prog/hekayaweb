@@ -375,12 +375,12 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
       {/* Order Details Modal */}
       {selectedOrderDetails && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          className="modal-backdrop-overlay bg-black/60 backdrop-blur-xs p-4"
           onClick={() => setSelectedOrderDetails(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#f8f9fa] rounded-2xl p-6 space-y-4 border border-[#e0e0e0] shadow-2xl text-[#000000]"
+            className="modal-content-wrapper modal-body-scroll w-full max-w-lg bg-[#f8f9fa] rounded-2xl p-6 space-y-4 border border-[#e0e0e0] shadow-2xl text-[#000000]"
           >
             <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
               <div>

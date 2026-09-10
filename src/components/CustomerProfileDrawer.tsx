@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext.js';
 import { storage } from '../utils/storage.js';
+import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss.js';
 import {
   X,
   User,
@@ -35,6 +36,8 @@ export const CustomerProfileDrawer: React.FC = () => {
     showToast,
     language,
   } = useApp();
+
+  const { touchHandlers, style } = useSwipeToDismiss(() => setIsCustomerProfileOpen(false));
 
   const isAr = language === 'ar';
   const [activeTab, setActiveTab] = useState<'orders' | 'addresses' | 'details'>('orders');
@@ -193,7 +196,7 @@ export const CustomerProfileDrawer: React.FC = () => {
   return (
     <div
       id="customer-profile-overlay"
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-fade-in"
+      className="modal-backdrop-overlay bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) setIsCustomerProfileOpen(false);
       }}
@@ -201,15 +204,25 @@ export const CustomerProfileDrawer: React.FC = () => {
       {/* Bottom sheet container on mobile / dialog on desktop */}
       <div
         id="customer-profile-drawer"
-        className="w-full sm:max-w-2xl bg-[#f8f9fa] text-[#111111] border-t sm:border border-[#e0e0e0] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up-sheet sm:animate-scale-in max-h-[92vh] flex flex-col"
+        style={style}
+        className="modal-content-wrapper modal-body-scroll w-full sm:max-w-2xl bg-[#f8f9fa] text-[#111111] border-t sm:border border-[#e0e0e0] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up-sheet sm:animate-scale-in flex flex-col"
       >
-        {/* Mobile Pull Indicator */}
-        <div className="sm:hidden w-full flex justify-center pt-3 pb-1">
-          <div className="w-12 h-1.5 bg-neutral-700 rounded-full" />
+        {/* Interactive Top Drag Handle */}
+        <div 
+          className="w-full flex justify-center items-center pt-3 pb-2 cursor-pointer select-none touch-none hover:opacity-80 transition-opacity"
+          onClick={() => setIsCustomerProfileOpen(false)}
+          role="button"
+          aria-label={isAr ? 'إغلاق الملف الشخصي' : 'Close profile'}
+          {...touchHandlers}
+        >
+          <div className="w-12 h-1.5 bg-neutral-400 hover:bg-neutral-600 rounded-full transition-colors pointer-events-none" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e0e0e0] bg-[#f8f9fa]">
+        <div 
+          className="flex items-center justify-between px-6 py-4 border-b border-[#e0e0e0] bg-[#f8f9fa] cursor-pointer sm:cursor-default"
+          {...touchHandlers}
+        >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#111111] to-[#111111] text-[#111111] flex items-center justify-center font-bold text-base shadow-md">
               {customer.fullName.charAt(0)}

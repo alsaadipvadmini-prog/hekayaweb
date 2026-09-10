@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext.js';
 import { Order, CartItem, PaymentMethod } from '../types.js';
 import { BrandLogo } from './BrandLogo.js';
+import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss.js';
 import {
   X,
   MapPin,
@@ -46,6 +47,8 @@ export const CheckoutModal: React.FC = () => {
     showToast,
     settings,
   } = useApp();
+
+  const { touchHandlers, style } = useSwipeToDismiss(() => setIsCheckoutOpen(false));
 
   const isAr = language === 'ar';
 
@@ -216,7 +219,8 @@ export const CheckoutModal: React.FC = () => {
   const validate = (): boolean => {
     const errs: Record<string, string> = {};
 
-    // 1. Full name required
+    // 1. Flexible Name Entry Requirement
+    // Accepts a single word (e.g. "محمد") or any number of names as valid input
     if (!fullName.trim()) {
       errs.fullName = isAr ? 'الاسم مطلوب يا نشمي' : 'Name is required';
     }
@@ -379,7 +383,7 @@ export const CheckoutModal: React.FC = () => {
   return (
     <div
       id="checkout-modal-backdrop"
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto animate-fade-in"
+      className="modal-backdrop-overlay bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) setIsCheckoutOpen(false);
       }}
@@ -387,15 +391,25 @@ export const CheckoutModal: React.FC = () => {
       {/* Container: Native Bottom Sheet on Mobile, Centered Modal on Desktop */}
       <div
         id="checkout-modal-container"
-        className="w-full sm:max-w-2xl bg-[#f8f9fa] text-[#111111] border-t sm:border border-[#e0e0e0] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up-sheet sm:animate-scale-in max-h-[92vh] flex flex-col"
+        style={style}
+        className="modal-content-wrapper modal-body-scroll w-full sm:max-w-2xl bg-[#f8f9fa] text-[#111111] border-t sm:border border-[#e0e0e0] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up-sheet sm:animate-scale-in flex flex-col"
       >
-        {/* Mobile Pull Indicator */}
-        <div className="sm:hidden w-full flex justify-center pt-3 pb-1">
-          <div className="w-12 h-1.5 bg-neutral-700 rounded-full" />
+        {/* Interactive Top Drag Handle */}
+        <div 
+          className="w-full flex justify-center items-center pt-3 pb-2 cursor-pointer select-none touch-none hover:opacity-80 transition-opacity"
+          onClick={() => setIsCheckoutOpen(false)}
+          role="button"
+          aria-label={isAr ? 'إغلاق نافذة الطلب' : 'Close checkout'}
+          {...touchHandlers}
+        >
+          <div className="w-12 h-1.5 bg-neutral-400 hover:bg-neutral-600 rounded-full transition-colors pointer-events-none" />
         </div>
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e0e0e0] bg-[#F8F9FA]">
+        <div 
+          className="flex items-center justify-between px-6 py-4 border-b border-[#e0e0e0] bg-[#F8F9FA] cursor-pointer sm:cursor-default"
+          {...touchHandlers}
+        >
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-[#111111] flex items-center justify-center text-white border border-[#111111]">
               <Truck className="w-4 h-4" />
@@ -560,22 +574,11 @@ export const CheckoutModal: React.FC = () => {
             <form onSubmit={handleSubmitOrder} className="space-y-5">
               {/* Customer quick sign in banner */}
               {!customer ? (
-                <div className="p-3 bg-[#f8f9fa] border border-[#e0e0e0] rounded-2xl flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs">
-                    <User className="w-4 h-4 text-neutral-900 shrink-0" />
-                    <div>
-                      <span className="font-bold text-[#111111] block">
-                        {isAr ? 'عندك حساب معنا يا كشخة؟' : 'Already have an account?'}
-                      </span>
-                      <span className="text-[11px] text-neutral-500">
-                        {isAr ? 'سجل دخولك لتعبئة العنوان تلقائياً وحفظ النقاط' : 'Sign in to autofill addresses'}
-                      </span>
-                    </div>
-                  </div>
+                <div className="p-3 bg-[#f8f9fa] border border-[#e0e0e0] rounded-2xl flex items-center justify-center">
                   <button
                     type="button"
                     onClick={() => setIsCustomerAuthOpen(true)}
-                    className="px-3 py-1.5 bg-[#111111] hover:bg-[#333333] text-white text-xs rounded-xl font-medium shrink-0 transition-colors"
+                    className="px-6 py-2 bg-[#111111] hover:bg-[#333333] text-white text-xs rounded-xl font-medium transition-colors"
                   >
                     {isAr ? 'تسجيل الدخول' : 'Sign In'}
                   </button>
@@ -734,15 +737,9 @@ export const CheckoutModal: React.FC = () => {
 
               {/* 6. PAYMENT GATEWAY SELECTION */}
               <div className="pt-2 border-t border-[#e0e0e0] space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-neutral-600 flex items-center gap-1.5">
-                    <CreditCard className="w-4 h-4 text-neutral-900" />
-                    <span>{isAr ? 'اختر طريقة الدفع الآمنة:' : 'Select Payment Method:'}</span>
-                  </label>
-                  <span className="text-[11px] text-neutral-900 flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3" />
-                    {isAr ? 'معاملات مشفرة 100%' : 'PCI DSS Compliant'}
-                  </span>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', width: '100%', fontWeight: 600, textAlign: 'center', marginBottom: '12px', fontSize: '0.95rem' }} className="text-[#111111]">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>{isAr ? 'معاملات مشفرة 100%' : '100% Encrypted Transactions'}</span>
                 </div>
 
                 

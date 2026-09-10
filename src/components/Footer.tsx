@@ -159,7 +159,7 @@ export const Footer: React.FC = () => {
                   value={newsletterInput}
                   onChange={(e) => setNewsletterInput(e.target.value)}
                   placeholder={isAr ? 'رقم الهاتف أو البريد...' : 'Your phone or email...'}
-                  className="w-full px-3.5 py-2.5 rounded-full border border-[#e0e0e0] bg-[#f8f9fa] text-xs text-[#111111] placeholder-white/30 focus:outline-hidden focus:border-white/30 font-sans"
+                  className="w-full px-3.5 py-2.5 rounded-full border border-[#e0e0e0] bg-[#f8f9fa] text-xs text-[#111111] placeholder-neutral-400 focus:outline-hidden focus:border-neutral-400 font-sans"
                 />
                 <button
                   type="submit"

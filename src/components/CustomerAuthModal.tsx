@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext.js';
 import { BrandLogo } from './BrandLogo.js';
+import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss.js';
 import { X, User, Lock, Mail, Phone, ArrowRight, CheckCircle2, ShieldCheck, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { JORDAN_GOVERNORATES } from '../data/jordanLocations.js';
 
@@ -15,6 +16,8 @@ export const CustomerAuthModal: React.FC = () => {
     showToast,
     language,
   } = useApp();
+
+  const { touchHandlers, style } = useSwipeToDismiss(() => setIsCustomerAuthOpen(false));
 
   const isAr = language === 'ar';
 
@@ -143,7 +146,7 @@ export const CustomerAuthModal: React.FC = () => {
   return (
     <div
       id="customer-auth-overlay"
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-fade-in"
+      className="modal-backdrop-overlay bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) setIsCustomerAuthOpen(false);
       }}
@@ -151,15 +154,25 @@ export const CustomerAuthModal: React.FC = () => {
       {/* Container: Bottom sheet on mobile, rounded modal on desktop */}
       <div
         id="customer-auth-modal"
-        className="w-full sm:max-w-md bg-[#f8f9fa] text-[#111111] border-t sm:border border-[#e0e0e0] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up-sheet sm:animate-scale-in max-h-[90vh] flex flex-col"
+        style={style}
+        className="modal-content-wrapper modal-body-scroll w-full sm:max-w-md bg-[#f8f9fa] text-[#111111] border-t sm:border border-[#e0e0e0] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up-sheet sm:animate-scale-in flex flex-col"
       >
-        {/* Mobile Pull Indicator */}
-        <div className="sm:hidden w-full flex justify-center pt-3 pb-1">
-          <div className="w-12 h-1.5 bg-neutral-700 rounded-full" />
+        {/* Interactive Top Drag Handle */}
+        <div 
+          className="w-full flex justify-center items-center pt-3 pb-2 cursor-pointer select-none touch-none hover:opacity-80 transition-opacity"
+          onClick={() => setIsCustomerAuthOpen(false)}
+          role="button"
+          aria-label={isAr ? 'إغلاق تسجيل الدخول' : 'Close login'}
+          {...touchHandlers}
+        >
+          <div className="w-12 h-1.5 bg-neutral-400 hover:bg-neutral-600 rounded-full transition-colors pointer-events-none" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e0e0e0]">
+        <div 
+          className="flex items-center justify-between px-6 py-4 border-b border-[#e0e0e0] cursor-pointer sm:cursor-default"
+          {...touchHandlers}
+        >
           <div className="flex items-center gap-3">
             <BrandLogo size="sm" />
             <div>

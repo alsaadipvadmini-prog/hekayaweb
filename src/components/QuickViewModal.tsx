@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext.js';
+import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss.js';
 import {
   X,
   ShoppingBag,
@@ -24,6 +25,7 @@ export const QuickViewModal: React.FC = () => {
     const isAr = language === 'ar';
   const product = quickViewProduct;
   const isWish = product ? isInWishlist(product.id) : false;
+  const { touchHandlers, style } = useSwipeToDismiss(() => setQuickViewProduct(null));
 
   const safeSizes = product ? (Array.isArray(product.sizes) ? product.sizes : (typeof product.sizes === "string" ? product.sizes.split(",").map(s=>s.trim()) : (product.sizes && typeof product.sizes === "object" ? Object.values(product.sizes) : []))) : [];
   const safeColors = product ? (Array.isArray(product.colors) ? product.colors : (typeof product.colors === "string" ? product.colors.split(",").map(c=>c.trim()) : (product.colors && typeof product.colors === "object" ? Object.values(product.colors) : []))) : [];
@@ -73,8 +75,17 @@ export const QuickViewModal: React.FC = () => {
   };
 
   const SizeGuideModal = () => (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setIsSizeGuideOpen(false)}>
-      <div className="bg-[#f8f9fa] rounded-3xl w-full max-w-sm p-6 relative shadow-2xl" onClick={e => e.stopPropagation()}>
+    <div className="modal-backdrop-overlay bg-black/60 backdrop-blur-sm z-[60]" onClick={() => setIsSizeGuideOpen(false)}>
+      <div className="modal-content-wrapper modal-body-scroll bg-[#f8f9fa] rounded-3xl w-full max-w-sm p-6 relative shadow-2xl" onClick={e => e.stopPropagation()}>
+        {/* Interactive Top Drag Handle */}
+        <div 
+          className="w-full flex justify-center items-center -mt-2 pb-3 cursor-pointer select-none touch-none hover:opacity-80 transition-opacity"
+          onClick={() => setIsSizeGuideOpen(false)}
+          role="button"
+          aria-label="إغلاق دليل المقاسات"
+        >
+          <div className="w-12 h-1.5 bg-neutral-400 hover:bg-neutral-600 rounded-full transition-colors pointer-events-none" />
+        </div>
         <button onClick={() => setIsSizeGuideOpen(false)} className="absolute top-4 right-4 p-2 bg-neutral-100 rounded-full hover:bg-neutral-200">
           <X className="w-5 h-5 text-neutral-800" />
         </button>
@@ -108,7 +119,7 @@ export const QuickViewModal: React.FC = () => {
   return (
     <AnimatePresence>
       {product && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+        <div className="modal-backdrop-overlay z-50 p-4 sm:p-6 overflow-hidden">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -122,11 +133,23 @@ export const QuickViewModal: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`relative w-[95vw] max-w-[500px] max-h-[85vh] rounded-[1.5rem] shadow-2xl flex flex-col overflow-hidden ${
+            style={style}
+            className={`modal-content-wrapper modal-body-scroll relative w-[95vw] max-w-[500px] rounded-[1.5rem] shadow-2xl flex flex-col overflow-hidden ${
               'bg-[#f8f9fa] border border-[#e0e0e0]'
             }`}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Interactive Top Drag Handle */}
+            <div 
+              className="w-full flex justify-center items-center pt-3 pb-1 cursor-pointer select-none touch-none hover:opacity-80 transition-opacity z-20"
+              onClick={() => setQuickViewProduct(null)}
+              role="button"
+              aria-label={isAr ? 'إغلاق المعاينة السريعة' : 'Close quick view'}
+              {...touchHandlers}
+            >
+              <div className="w-12 h-1.5 bg-neutral-400 hover:bg-neutral-600 rounded-full transition-colors pointer-events-none" />
+            </div>
+
             {/* Floating Close Button */}
             <button
               onClick={() => setQuickViewProduct(null)}

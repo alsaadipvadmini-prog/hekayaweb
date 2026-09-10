@@ -18,6 +18,11 @@
 * {
   font-family: 'Megarin', 'Gumela Arabic', 'Readex Pro', sans-serif !important;
   font-weight: 600 !important;
+  box-sizing: border-box;
+}
+
+*::before, *::after {
+  box-sizing: border-box;
 }
 
 *:lang(ar), [dir="rtl"], .arabic-text {
@@ -41,17 +46,26 @@
   html, body, #root {
     background-color: #ffffff !important;
     color: #111111 !important;
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   body {
     font-family: 'Megarin', 'Gumela Arabic', 'Readex Pro', sans-serif;
     background-color: #ffffff;
     color: #111111;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: none;
     font-weight: 600;
+    max-width: 100% !important;
+    width: 100%;
+    position: relative;
+    box-sizing: border-box;
   }
 
   /* Prevent awkward text selection on interactive mobile app elements */
@@ -116,6 +130,51 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Universal Modal Setup for Mobile Smooth Scroll */
+.modal-backdrop-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  .modal-backdrop-overlay {
+    align-items: center;
+    padding: 24px 12px;
+  }
+}
+
+.modal-content-wrapper {
+  max-height: 85vh;
+  margin-bottom: env(safe-area-inset-bottom, 20px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .modal-content-wrapper {
+    margin-bottom: 0;
+  }
+}
+
+.modal-body-scroll {
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Printable AWB shipping label styles */

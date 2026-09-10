@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext.js';
 import { X, Heart, ShoppingBag, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Product } from '../types.js';
+import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss.js';
 
 export const WishlistDrawer: React.FC = () => {
   const {
@@ -16,6 +17,8 @@ export const WishlistDrawer: React.FC = () => {
     setIsClearanceView,
     setCurrentCategory,
   } = useApp();
+
+  const { touchHandlers, style } = useSwipeToDismiss(() => setIsWishlistOpen(false));
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -92,19 +95,30 @@ export const WishlistDrawer: React.FC = () => {
     <div
       id="wishlist-drawer-backdrop"
       onClick={() => setIsWishlistOpen(false)}
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-stretch sm:justify-end transition-opacity duration-300 animate-fade-in"
+      className="modal-backdrop-overlay bg-black/60 backdrop-blur-xs animate-fade-in transition-opacity duration-300"
     >
       <div
         id="wishlist-drawer-container"
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-md bg-[#f8f9fa] text-[#111111] border-t sm:border-t-0 sm:border-l border-[#e0e0e0] rounded-t-3xl sm:rounded-none shadow-2xl flex flex-col justify-between max-h-[90vh] sm:max-h-full h-auto sm:h-full animate-slide-up-sheet sm:animate-slide-in-right overflow-hidden"
+        style={style}
+        className="modal-content-wrapper modal-body-scroll w-full sm:max-w-md bg-[#f8f9fa] text-[#111111] border-t sm:border border-[#e0e0e0] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col h-auto animate-slide-up-sheet overflow-hidden"
       >
-        <div className="sm:hidden w-full flex justify-center pt-3 pb-1">
-          <div className="w-12 h-1.5 bg-neutral-300 rounded-full" />
+        {/* Interactive Top Drag Handle */}
+        <div 
+          className="w-full flex justify-center items-center pt-3 pb-2 cursor-pointer select-none touch-none hover:opacity-80 transition-opacity"
+          onClick={() => setIsWishlistOpen(false)}
+          role="button"
+          aria-label={isAr ? 'إغلاق المفضلة' : 'Close wishlist'}
+          {...touchHandlers}
+        >
+          <div className="w-12 h-1.5 bg-neutral-400 hover:bg-neutral-600 rounded-full transition-colors pointer-events-none" />
         </div>
 
         {/* Drawer Header */}
-        <div className="p-4 sm:p-5 border-b border-[#e0e0e0] flex items-center justify-between bg-[#f8f9fa]">
+        <div 
+          className="p-4 sm:p-5 border-b border-[#e0e0e0] flex items-center justify-between bg-[#f8f9fa] cursor-pointer sm:cursor-default"
+          {...touchHandlers}
+        >
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-[#111111] flex items-center justify-center text-white border border-[#111111] shadow-xs">
               <Heart className="w-4 h-4 fill-white text-white" />

@@ -74,13 +74,23 @@ export const AdminPinModal: React.FC = () => {
     <div
       id="admin-pin-modal-overlay"
       onClick={() => setIsAdminPinModalOpen(false)}
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+      className="modal-backdrop-overlay bg-black/50 backdrop-blur-sm animate-fade-in"
     >
       <div
         id="admin-pin-modal-container"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md bg-[#f8f9fa] border border-[#e0e0e0] rounded-3xl p-6 sm:p-8 text-[#111111] shadow-2xl space-y-6 animate-scale-up"
+        className="modal-content-wrapper modal-body-scroll w-full max-w-md bg-[#f8f9fa] border border-[#e0e0e0] rounded-3xl p-6 sm:p-8 text-[#111111] shadow-2xl space-y-6 animate-scale-up"
       >
+        {/* Interactive Top Drag Handle */}
+        <div 
+          className="w-full flex justify-center items-center -mt-2 pb-2 cursor-pointer select-none touch-none hover:opacity-80 transition-opacity"
+          onClick={() => setIsAdminPinModalOpen(false)}
+          role="button"
+          aria-label={isAr ? 'إغلاق نافذة الإدارة' : 'Close admin login'}
+        >
+          <div className="w-12 h-1.5 bg-neutral-400 hover:bg-neutral-600 rounded-full transition-colors pointer-events-none" />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-4">
           <div className="flex items-center gap-3">

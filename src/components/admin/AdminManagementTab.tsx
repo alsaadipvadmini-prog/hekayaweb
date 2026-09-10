@@ -450,12 +450,12 @@ export const AdminManagementTab: React.FC<AdminManagementTabProps> = ({ token, s
       {/* Edit Display Name Modal */}
       {editingAdmin && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          className="modal-backdrop-overlay bg-black/60 backdrop-blur-xs p-4"
           onClick={() => setEditingAdmin(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-[#f8f9fa] rounded-2xl p-6 space-y-4 border border-[#e0e0e0] shadow-2xl text-[#000000]"
+            className="modal-content-wrapper modal-body-scroll w-full max-w-md bg-[#f8f9fa] rounded-2xl p-6 space-y-4 border border-[#e0e0e0] shadow-2xl text-[#000000]"
           >
             <h3 className="font-bold text-base text-[#111111]">تعديل الاسم التعريفي للمسؤول</h3>
             <p className="text-xs text-neutral-500">الحساب: {editingAdmin.email}</p>
@@ -496,12 +496,12 @@ export const AdminManagementTab: React.FC<AdminManagementTabProps> = ({ token, s
       {/* Create Direct Admin Modal */}
       {isAddModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          className="modal-backdrop-overlay bg-black/60 backdrop-blur-xs p-4"
           onClick={() => setIsAddModalOpen(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-[#f8f9fa] rounded-2xl p-6 space-y-4 border border-[#e0e0e0] shadow-2xl text-[#000000]"
+            className="modal-content-wrapper modal-body-scroll w-full max-w-md bg-[#f8f9fa] rounded-2xl p-6 space-y-4 border border-[#e0e0e0] shadow-2xl text-[#000000]"
           >
             <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
               <h3 className="font-bold text-base text-[#111111]">إضافة وتفعيل مسؤول جديد</h3>

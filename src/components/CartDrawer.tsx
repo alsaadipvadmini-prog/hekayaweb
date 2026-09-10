@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext.js';
 import { X, Trash2, Plus, Minus, ArrowRight, ArrowLeft, ShoppingBag, Truck, Sparkles } from 'lucide-react';
+import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss.js';
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -16,6 +17,8 @@ export const CartDrawer: React.FC = () => {
     setCurrentCategory,
   } = useApp();
 
+  const { touchHandlers, style } = useSwipeToDismiss(() => setIsCartOpen(false));
+
   if (!isCartOpen) return null;
 
   const isAr = language === 'ar';
@@ -30,20 +33,30 @@ export const CartDrawer: React.FC = () => {
     <div
       id="cart-drawer-backdrop"
       onClick={() => setIsCartOpen(false)}
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-stretch sm:justify-end transition-opacity duration-300 animate-fade-in"
+      className="modal-backdrop-overlay bg-black/50 backdrop-blur-sm animate-fade-in transition-opacity duration-300"
     >
       <div
         id="cart-drawer-container"
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-md bg-[#f8f9fa] text-[#111111] border-t sm:border-t-0 sm:border-l border-[#e0e0e0] rounded-t-3xl sm:rounded-none shadow-2xl flex flex-col justify-between max-h-[88vh] sm:max-h-full h-auto sm:h-full animate-slide-up-sheet sm:animate-slide-in-right overflow-hidden"
+        style={style}
+        className="modal-content-wrapper modal-body-scroll w-full sm:max-w-md bg-[#f8f9fa] text-[#111111] border-t sm:border border-[#e0e0e0] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col justify-between h-auto animate-slide-up-sheet overflow-hidden"
       >
-        {/* Mobile Pull Indicator */}
-        <div className="sm:hidden w-full flex justify-center pt-3 pb-1">
-          <div className="w-12 h-1.5 bg-neutral-700 rounded-full" />
+        {/* Interactive Top Drag Handle */}
+        <div 
+          className="w-full flex justify-center items-center pt-3 pb-2 cursor-pointer select-none touch-none hover:opacity-80 transition-opacity" 
+          onClick={() => setIsCartOpen(false)}
+          role="button"
+          aria-label={isAr ? 'إغلاق السلة' : 'Close cart'}
+          {...touchHandlers}
+        >
+          <div className="w-12 h-1.5 bg-neutral-400 hover:bg-neutral-600 rounded-full transition-colors pointer-events-none" />
         </div>
 
         {/* Drawer Header */}
-        <div className="p-5 border-b border-[#e0e0e0] flex items-center justify-between bg-[#f8f9fa]">
+        <div 
+          className="p-5 border-b border-[#e0e0e0] flex items-center justify-between bg-[#f8f9fa] cursor-pointer sm:cursor-default"
+          {...touchHandlers}
+        >
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-[#111111] flex items-center justify-center text-white border border-[#111111]">
               <ShoppingBag className="w-4 h-4" />

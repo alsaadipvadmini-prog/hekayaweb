@@ -15,7 +15,88 @@ import {
   Tag,
   Layers,
   Sparkles,
+  Palette,
+  Ruler
 } from 'lucide-react';
+
+const MAIN_CATEGORIES: { id: MainCategory; label: string }[] = [
+  { id: 'family', label: 'أطفال وعائلة (Kids & Family)' },
+  { id: 'women', label: 'نسائي (Women)' },
+  { id: 'men', label: 'رجالي (Men)' },
+  { id: 'clearance', label: 'تصفية (Clearance)' },
+  { id: 'lingerie', label: 'لانجري وحرير (Lingerie)' },
+  { id: 'beauty', label: 'ميكأب وعناية (Beauty)' },
+  { id: 'perfumes', label: 'عطور (Perfumes)' },
+];
+
+const SUB_CATEGORIES_MAP: Record<MainCategory, { id: string; label: string }[]> = {
+  family: [
+    { id: 'kids', label: 'ملابس أطفال (Kids Clothing)' },
+    { id: 'kids_shoes', label: 'أحذية أطفال (Kids Shoes)' },
+    { id: 'baby', label: 'مواليد ورضع (Baby)' },
+    { id: 'accessories', label: 'إكسسوارات (Accessories)' },
+  ],
+  women: [
+    { id: 'women_clothing', label: 'ملابس نسائية (Women Clothing)' },
+    { id: 'women_shoes', label: 'أحذية نسائية (Women Shoes)' },
+    { id: 'hijab', label: 'عبي وحجابات (Abayas & Hijabs)' },
+    { id: 'accessories', label: 'إكسسوارات (Accessories)' },
+  ],
+  men: [
+    { id: 'men_clothing', label: 'ملابس رجالية (Men Clothing)' },
+    { id: 'men_shoes', label: 'أحذية رجالية (Men Shoes)' },
+    { id: 'accessories', label: 'إكسسوارات (Accessories)' },
+  ],
+  clearance: [
+    { id: 'clearance_all', label: 'كل التصفية (All Clearance)' },
+    { id: 'sets', label: 'طقومات (Sets)' },
+  ],
+  lingerie: [
+    { id: 'lingerie_all', label: 'كل اللانجري (All Lingerie)' },
+  ],
+  beauty: [
+    { id: 'beauty_all', label: 'كل الميكأب (All Beauty)' },
+  ],
+  perfumes: [
+    { id: 'perfumes_all', label: 'كل العطور (All Perfumes)' },
+  ],
+};
+
+const PREDEFINED_COLORS = [
+  { hex: '#000000', name: 'أسود' },
+  { hex: '#FFFFFF', name: 'أبيض' },
+  { hex: '#111111', name: 'رمادي غامق' },
+  { hex: '#808080', name: 'رمادي' },
+  { hex: '#C0C0C0', name: 'فضي' },
+  { hex: '#800000', name: 'خمري' },
+  { hex: '#FF0000', name: 'أحمر' },
+  { hex: '#FFC0CB', name: 'وردي' },
+  { hex: '#800080', name: 'بنفسجي' },
+  { hex: '#000080', name: 'كحلي' },
+  { hex: '#0000FF', name: 'أزرق' },
+  { hex: '#ADD8E6', name: 'سماوي' },
+  { hex: '#008000', name: 'أخضر' },
+  { hex: '#FFFF00', name: 'أصفر' },
+  { hex: '#FFA500', name: 'برتقالي' },
+  { hex: '#A52A2A', name: 'بني' },
+  { hex: '#F5F5DC', name: 'بيج' },
+  { hex: '#FFD700', name: 'ذهبي' },
+];
+
+const SIZE_GROUPS = [
+  {
+    label: 'مقاسات قياسية (الملابس)',
+    sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Free Size']
+  },
+  {
+    label: 'أعمار الأطفال (سنوات)',
+    sizes: ['0-3M', '3-6M', '6-12M', '1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y', '7-8Y', '9-10Y', '11-12Y', '13-14Y']
+  },
+  {
+    label: 'أحذية (أطفال وبالغين)',
+    sizes: ['22', '24', '26', '28', '30', '32', '34', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45']
+  }
+];
 
 interface ProductsTabProps {
   products: Product[];
@@ -41,11 +122,26 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
   // Form State
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    title: string;
+    titleEn: string;
+    category: MainCategory;
+    subCategory: string; // Changed to string to allow custom subcategories
+    price: number | '';
+    oldPrice: number | '';
+    inStock: boolean;
+    isClearance: boolean;
+    sizes: string[];
+    colors: string[];
+    image: string;
+    images: [string, string, string, string];
+    description: string;
+    descriptionEn: string;
+  }>({
     title: '',
     titleEn: '',
     category: 'women' as MainCategory,
-    subCategory: 'women_clothing' as SubCategory,
+    subCategory: 'women_clothing',
     price: 25,
     oldPrice: 35,
     inStock: true,
@@ -53,10 +149,12 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['#111111', '#FFFFFF', '#000000'],
     image: '',
-    images: ['', '', '', ''] as [string, string, string, string],
+    images: ['', '', '', ''],
     description: '',
     descriptionEn: '',
   });
+
+  const [customSizeInput, setCustomSizeInput] = useState('');
 
   const openNewProductModal = () => {
     setEditingProductId(null);
@@ -69,13 +167,14 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
       oldPrice: 35,
       inStock: true,
       isClearance: false,
-      sizes: 'S, M, L, XL',
-      colors: '#111111, #FFFFFF, #000000',
+      sizes: ['S', 'M', 'L', 'XL'],
+      colors: ['#111111', '#FFFFFF', '#000000'],
       image: 'prod-1.jpg',
       images: ['prod-1.jpg', 'prod-2.jpg', 'prod-3.jpg', 'hero-embroidery.jpg'],
       description: 'قطعة راقية مصممة بأعلى معايير الفخامة والراحة وخامات أصلية.',
       descriptionEn: 'Luxury fashion piece crafted with high attention to detail and premium fabrics.',
     });
+    setCustomSizeInput('');
     setIsModalOpen(true);
   };
 
@@ -88,6 +187,22 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
       product.images?.[3] || '',
     ];
 
+    let parsedSizes: string[] = [];
+    if (Array.isArray(product.sizes)) {
+      parsedSizes = product.sizes;
+    } else if (typeof product.sizes === "string") {
+      parsedSizes = (product.sizes as string).split(",").map(s => s.trim()).filter(Boolean);
+    } else if (product.sizes && typeof product.sizes === "object") {
+      parsedSizes = Object.values(product.sizes);
+    }
+
+    let parsedColors: string[] = [];
+    if (Array.isArray(product.colors)) {
+      parsedColors = product.colors;
+    } else if (typeof product.colors === "string") {
+      parsedColors = (product.colors as string).split(",").map(c => c.trim()).filter(Boolean);
+    }
+
     setForm({
       title: product.title,
       titleEn: product.titleEn || '',
@@ -97,13 +212,14 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
       oldPrice: product.oldPrice || product.price,
       inStock: product.inStock !== false,
       isClearance: Boolean(product.isClearance),
-      sizes: product.sizes || ['S', 'M', 'L', 'XL'],
-      colors: product.colors || ['#111111', '#FFFFFF'],
+      sizes: parsedSizes.length > 0 ? parsedSizes : ['S', 'M', 'L', 'XL'],
+      colors: parsedColors.length > 0 ? parsedColors : ['#111111', '#FFFFFF'],
       image: product.image,
       images: existingImages,
       description: product.description || '',
       descriptionEn: product.descriptionEn || '',
     });
+    setCustomSizeInput('');
     setIsModalOpen(true);
   };
 
@@ -140,9 +256,6 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
       return;
     }
 
-    const sizesArr = typeof form.sizes === "string" ? form.sizes.split(",").map(s => s.trim()).filter(Boolean) : form.sizes;
-    const colorsArr = typeof form.colors === "string" ? form.colors.split(",").map(c => c.trim()).filter(Boolean) : form.colors;
-
     const payload = {
       title: form.title,
       titleEn: form.titleEn,
@@ -152,8 +265,8 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
       oldPrice: Number(form.oldPrice) || Number(form.price),
       inStock: form.inStock,
       isClearance: form.isClearance,
-      sizes: sizesArr,
-      colors: colorsArr,
+      sizes: form.sizes,
+      colors: form.colors,
       image: form.images[0] || form.image || 'prod-1.jpg',
       images: form.images.filter(Boolean),
       description: form.description,
@@ -566,12 +679,12 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
       {/* Add / Edit Product Modal with 4-Slot Dedicated Gallery */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          className="modal-backdrop-overlay bg-black/60 backdrop-blur-xs p-4"
           onClick={() => setIsModalOpen(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-3xl bg-[#f8f9fa] rounded-2xl p-6 space-y-6 border border-[#e0e0e0] shadow-2xl text-[#000000] my-8 animate-in fade-in zoom-in-95"
+            className="modal-content-wrapper modal-body-scroll w-full max-w-3xl bg-[#f8f9fa] rounded-2xl p-6 space-y-6 border border-[#e0e0e0] shadow-2xl text-[#000000] my-8 animate-in fade-in zoom-in-95"
           >
             <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
               <div className="flex items-center gap-2">
@@ -620,27 +733,51 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
                   <label className="block text-xs font-bold text-neutral-700 mb-1">القسم الرئيسي</label>
                   <select
                     value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value as MainCategory })}
+                    onChange={(e) => {
+                      const newCategory = e.target.value as MainCategory;
+                      setForm({ 
+                        ...form, 
+                        category: newCategory,
+                        subCategory: SUB_CATEGORIES_MAP[newCategory]?.[0]?.id || ''
+                      });
+                    }}
                     className="w-full px-3 py-2 text-xs border border-[#e0e0e0] rounded-xl focus:outline-hidden"
                   >
-                    <option value="women">القسم النسائي</option>
-                    <option value="men">القسم الرجالي</option>
-                    <option value="family">العائلة والطفل</option>
-                    <option value="lingerie">اللانجري والحرير</option>
-                    <option value="beauty">الميكأب والعناية</option>
-                    <option value="perfumes">العطور النيش</option>
+                    {MAIN_CATEGORIES.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.label}</option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-neutral-700 mb-1">التصنيف الفرعي</label>
-                  <input
-                    type="text"
-                    value={form.subCategory}
-                    onChange={(e) => setForm({ ...form, subCategory: e.target.value as SubCategory })}
-                    placeholder="e.g. women_clothing"
-                    className="w-full px-3 py-2 text-xs border border-[#e0e0e0] rounded-xl focus:outline-hidden"
-                  />
+                  <div className="flex flex-col gap-1">
+                    <select
+                      value={SUB_CATEGORIES_MAP[form.category]?.some(sub => sub.id === form.subCategory) ? form.subCategory : 'custom'}
+                      onChange={(e) => {
+                        if (e.target.value !== 'custom') {
+                          setForm({ ...form, subCategory: e.target.value });
+                        } else {
+                          setForm({ ...form, subCategory: '' });
+                        }
+                      }}
+                      className="w-full px-3 py-2 text-xs border border-[#e0e0e0] rounded-xl focus:outline-hidden"
+                    >
+                      {SUB_CATEGORIES_MAP[form.category]?.map(sub => (
+                        <option key={sub.id} value={sub.id}>{sub.label}</option>
+                      ))}
+                      <option value="custom">-- تصنيف مخصص --</option>
+                    </select>
+                    {(!SUB_CATEGORIES_MAP[form.category]?.some(sub => sub.id === form.subCategory) || !form.subCategory) && (
+                      <input
+                        type="text"
+                        value={form.subCategory}
+                        onChange={(e) => setForm({ ...form, subCategory: e.target.value })}
+                        placeholder="أدخل تصنيف مخصص"
+                        className="w-full px-3 py-2 text-xs border border-[#e0e0e0] rounded-xl focus:outline-hidden bg-white"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -667,32 +804,142 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
                 </div>
               </div>
 
-              {/* Sizes & Colors */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">
-                    المقاسات المتاحة (مفصولة بفواصل)
-                  </label>
-                  <input
-                    type="text"
-                    value={Array.isArray(form.sizes) ? form.sizes.join(", ") : form.sizes}
-                    onChange={(e) => setForm({ ...form, sizes: e.target.value })}
-                    placeholder="S, M, L, XL, XXL أو 37, 38, 39, 40"
-                    className="w-full px-3 py-2 text-xs border border-[#e0e0e0] rounded-xl focus:outline-hidden font-mono"
-                  />
+              {/* Sizes & Colors Advanced Selector */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 rounded-xl border border-neutral-200 shadow-xs">
+                {/* Sizes Selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 border-b border-neutral-100 pb-2">
+                    <Ruler className="w-4 h-4 text-neutral-500" />
+                    <label className="text-xs font-bold text-neutral-800">المقاسات المتاحة</label>
+                  </div>
+                  
+                  <div className="space-y-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    {SIZE_GROUPS.map((group, idx) => (
+                      <div key={idx} className="space-y-2">
+                        <span className="text-[10px] font-bold text-neutral-500 block">{group.label}</span>
+                        <div className="flex flex-wrap gap-2">
+                          {group.sizes.map((size) => {
+                            const isSelected = form.sizes.includes(size);
+                            return (
+                              <button
+                                key={size}
+                                type="button"
+                                onClick={() => {
+                                  setForm((prev) => ({
+                                    ...prev,
+                                    sizes: isSelected 
+                                      ? prev.sizes.filter(s => s !== size)
+                                      : [...prev.sizes, size]
+                                  }));
+                                }}
+                                className={`px-2.5 py-1 text-[11px] rounded-lg border transition-all cursor-pointer ${
+                                  isSelected 
+                                    ? 'bg-[#111111] text-white border-[#111111] shadow-xs' 
+                                    : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
+                                }`}
+                              >
+                                {size}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Custom Size Entry */}
+                    <div className="pt-2 border-t border-neutral-100">
+                      <span className="text-[10px] font-bold text-neutral-500 block mb-2">إضافة مقاس مخصص</span>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={customSizeInput}
+                          onChange={(e) => setCustomSizeInput(e.target.value)}
+                          placeholder="مثال: One Size"
+                          className="flex-1 px-3 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-hidden"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              if (customSizeInput.trim() && !form.sizes.includes(customSizeInput.trim())) {
+                                setForm(prev => ({ ...prev, sizes: [...prev.sizes, customSizeInput.trim()] }));
+                                setCustomSizeInput('');
+                              }
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (customSizeInput.trim() && !form.sizes.includes(customSizeInput.trim())) {
+                              setForm(prev => ({ ...prev, sizes: [...prev.sizes, customSizeInput.trim()] }));
+                              setCustomSizeInput('');
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        >
+                          إضافة
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">
-                    أكواد الألوان (HEX codes مفصولة بفواصل)
-                  </label>
-                  <input
-                    type="text"
-                    value={Array.isArray(form.colors) ? form.colors.join(", ") : form.colors}
-                    onChange={(e) => setForm({ ...form, colors: e.target.value })}
-                    placeholder="#111111, #FFFFFF, #000000"
-                    className="w-full px-3 py-2 text-xs border border-[#e0e0e0] rounded-xl focus:outline-hidden font-mono"
-                  />
+                {/* Colors Selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 border-b border-neutral-100 pb-2">
+                    <Palette className="w-4 h-4 text-neutral-500" />
+                    <label className="text-xs font-bold text-neutral-800">الألوان المتوفرة</label>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    {PREDEFINED_COLORS.map((color) => {
+                      const isSelected = form.colors.includes(color.hex);
+                      return (
+                        <button
+                          key={color.hex}
+                          type="button"
+                          onClick={() => {
+                            setForm((prev) => ({
+                              ...prev,
+                              colors: isSelected
+                                ? prev.colors.filter(c => c !== color.hex)
+                                : [...prev.colors, color.hex]
+                            }));
+                          }}
+                          className={`flex items-center gap-2 p-1.5 rounded-lg border transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-blue-50 border-blue-200 shadow-xs'
+                              : 'bg-neutral-50 border-neutral-200 hover:bg-neutral-100'
+                          }`}
+                        >
+                          <span 
+                            className="w-4 h-4 rounded-full border border-black/10 shrink-0 shadow-xs"
+                            style={{ backgroundColor: color.hex }}
+                          />
+                          <span className="text-[10px] font-bold truncate text-neutral-700 flex-1 text-start">
+                            {color.name}
+                          </span>
+                          {isSelected && <CheckCircle className="w-3 h-3 text-blue-600 shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="mt-2 flex flex-wrap gap-1.5 p-2 bg-neutral-50 rounded-lg border border-neutral-200 min-h-[40px]">
+                    {form.colors.length === 0 && <span className="text-[10px] text-neutral-400">لم يتم اختيار أي لون...</span>}
+                    {form.colors.map(hex => (
+                      <span key={hex} className="inline-flex items-center gap-1 bg-white border border-neutral-200 px-1.5 py-0.5 rounded-md text-[10px] font-mono shadow-xs">
+                        <span className="w-2.5 h-2.5 rounded-full border border-black/10" style={{ backgroundColor: hex }} />
+                        {hex}
+                        <button 
+                          type="button"
+                          onClick={() => setForm(prev => ({ ...prev, colors: prev.colors.filter(c => c !== hex) }))}
+                          className="text-neutral-400 hover:text-red-500 ml-1 cursor-pointer"
+                        >
+                          <XCircle className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 

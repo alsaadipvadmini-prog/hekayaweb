@@ -23,12 +23,12 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#ffffff] text-[#111111] selection:bg-[#e0e0e0] selection:text-[#111111] transition-colors duration-200 pb-16 lg:pb-0">
+    <div className="min-h-screen max-w-full w-full overflow-x-hidden flex flex-col justify-between bg-[#ffffff] text-[#111111] selection:bg-[#e0e0e0] selection:text-[#111111] transition-colors duration-200 pb-20 sm:pb-24 lg:pb-0">
       {/* Toast Notification Banner */}
       {toast && (
         <div
           id="toast-notification"
-          className="fixed bottom-20 lg:bottom-6 right-6 rtl:right-auto rtl:left-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md bg-[#F8F9FA]/95 text-[#111111] border border-[#e0e0e0] text-xs font-semibold animate-in fade-in slide-in-from-bottom-4"
+          className="fixed bottom-20 lg:bottom-6 right-6 rtl:right-auto rtl:left-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md bg-[#F8F9FA]/95 text-[#111111] border border-[#e0e0e0] text-xs font-semibold animate-in fade-in slide-in-from-bottom-4 max-w-[calc(100vw-3rem)]"
         >
           {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />}
           {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />}

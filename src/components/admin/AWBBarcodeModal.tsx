@@ -83,13 +83,13 @@ export const AWBBarcodeModal: React.FC<AWBBarcodeModalProps> = ({ order, onClose
   return (
     <div
       id="awb-modal-overlay"
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      className="modal-backdrop-overlay bg-black/70 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         id="awb-modal-container"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl bg-[#f8f9fa] text-[#000000] rounded-2xl shadow-2xl border border-[#e0e0e0] overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150"
+        className="modal-content-wrapper modal-body-scroll w-full max-w-2xl bg-[#f8f9fa] text-[#000000] rounded-2xl shadow-2xl border border-[#e0e0e0] overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Modal Top Bar (Hidden during print) */}
         <div className="no-print bg-[#111111] text-white px-6 py-4 flex items-center justify-between border-b border-[#111111]">

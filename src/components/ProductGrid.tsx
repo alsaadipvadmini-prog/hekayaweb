@@ -17,9 +17,11 @@ export const ProductGrid: React.FC = () => {
     language,
     theme,
     currentCategory,
+    setCurrentCategory,
     currentSubCategory,
     setCurrentSubCategory,
     searchQuery,
+    setIsClearanceView,
   } = useApp();
   const { settings } = useApp();
 
@@ -32,6 +34,51 @@ export const ProductGrid: React.FC = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [sortBy, setSortBy] = useState<string>('default');
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('الكل');
+
+  const officialCategories = [
+    'الكل',
+    'القسم النسائي',
+    'القسم الرجالي',
+    'العائلة والطفل',
+    'اللانجيري',
+    'الميك أب والعناية',
+    'العطور الشرقية والغربية',
+    'قسم التصفية والعروض (1-5 د.أ)'
+  ];
+
+  const handleSelectOfficialCategory = (cat: string) => {
+    setSelectedCategory(cat);
+    if (cat === 'قسم التصفية والعروض (1-5 د.أ)') {
+      setIsClearanceView?.(true);
+      setCurrentCategory?.('clearance');
+      setCurrentSubCategory?.('clearance_all');
+    } else {
+      setIsClearanceView?.(false);
+      if (cat === 'القسم النسائي') {
+        setCurrentCategory?.('women');
+        setCurrentSubCategory?.('all');
+      } else if (cat === 'القسم الرجالي') {
+        setCurrentCategory?.('men');
+        setCurrentSubCategory?.('all');
+      } else if (cat === 'العائلة والطفل') {
+        setCurrentCategory?.('family');
+        setCurrentSubCategory?.('all');
+      } else if (cat === 'اللانجيري') {
+        setCurrentCategory?.('lingerie');
+        setCurrentSubCategory?.('all');
+      } else if (cat === 'الميك أب والعناية') {
+        setCurrentCategory?.('beauty');
+        setCurrentSubCategory?.('all');
+      } else if (cat === 'العطور الشرقية والغربية') {
+        setCurrentCategory?.('perfumes');
+        setCurrentSubCategory?.('all');
+      } else {
+        setCurrentCategory?.('all');
+        setCurrentSubCategory?.('all');
+      }
+    }
+  };
 
   // Sub-categories definition based on active main category
   const subCategoryTabs: { id: SubCategory | 'all'; nameAr: string; nameEn: string }[] =
@@ -103,26 +150,6 @@ export const ProductGrid: React.FC = () => {
 
   return (
     <section id="products-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Sub-category Filter Tabs */}
-      {subCategoryTabs.length > 0 && (
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-4 mb-4">
-          {subCategoryTabs.map((tab) => (
-            <button
-              key={tab.id}
-              id={`tab-subcat-${tab.id}`}
-              onClick={() => setCurrentSubCategory(tab.id)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition-all shrink-0 cursor-pointer border ${
-                currentSubCategory === tab.id
-                  ? 'bg-[#111111] text-white border-[#111111] shadow-md'
-                  : 'bg-neutral-100 text-neutral-700 border-[#e0e0e0] hover:bg-neutral-200'
-              }`}
-            >
-              {isAr ? tab.nameAr : tab.nameEn}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Filter and Sorting Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#e0e0e0]">
         <div>
@@ -159,9 +186,6 @@ export const ProductGrid: React.FC = () => {
               ? 'أحدث المعروضات وكولكشن الموسم'
               : 'Featured Season Collection'}
           </h2>
-          <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-1 font-serif italic">
-            {isAr ? `عرض ${totalItems} قطعة فاخرة جاهزة للتوصيل` : `Showing ${totalItems} luxury pieces`}
-          </p>
         </div>
 
         {/* Controls */}
@@ -188,11 +212,20 @@ export const ProductGrid: React.FC = () => {
 
           {/* Sort Dropdown */}
           <div className="relative">
+            <style>{`
+              #select-sort-products {
+                color: #111827 !important;
+                background-color: #ffffff;
+                border: 1px solid #d1d5db;
+                font-weight: 600;
+                opacity: 1 !important;
+              }
+            `}</style>
             <select
               id="select-sort-products"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-1.5 rounded-full text-xs font-medium bg-[#f8f9fa] border border-[#e0e0e0] text-neutral-200 focus:outline-hidden cursor-pointer hover:border-[#e0e0e0]"
+              className="px-4 py-1.5 rounded-full text-xs focus:outline-none cursor-pointer"
             >
               <option value="default">{isAr ? 'الترتيب: الافتراضي' : 'Sort: Default'}</option>
               <option value="price-asc">{isAr ? 'السعر: من الأقل للأعلى' : 'Price: Low to High'}</option>
@@ -203,6 +236,72 @@ export const ProductGrid: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Horizontal Category Navigation Bar */}
+      <div style={{
+        display: 'flex',
+        gap: '8px',
+        overflowX: 'auto',
+        padding: '8px 0',
+        marginTop: '12px',
+        marginBottom: '16px',
+        width: '100%',
+        scrollbarWidth: 'none',
+        WebkitOverflowScrolling: 'touch',
+        whiteSpace: 'nowrap'
+      }}>
+        {officialCategories.map((cat) => (
+          <button
+            key={cat}
+            id={`cat-btn-${encodeURIComponent(cat)}`}
+            onClick={() => handleSelectOfficialCategory(cat)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '7px 16px',
+              borderRadius: '20px',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              backgroundColor: selectedCategory === cat ? '#111111' : '#f3f4f6',
+              color: selectedCategory === cat ? '#ffffff' : '#1f2937',
+              border: '1px solid #e5e7eb',
+              cursor: 'pointer',
+              flexShrink: 0,
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Sub-category Filter Tabs */}
+      {subCategoryTabs.length > 0 && (
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '6px 0', marginBottom: '16px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', width: '100%', whiteSpace: 'nowrap' }}>
+          {subCategoryTabs.map((tab) => (
+            <button
+              key={tab.id}
+              id={`tab-subcat-${tab.id}`}
+              onClick={() => setCurrentSubCategory(tab.id)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                background: currentSubCategory === tab.id ? '#111827' : '#f3f4f6',
+                color: currentSubCategory === tab.id ? '#ffffff' : '#1f2937',
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {isAr ? tab.nameAr : tab.nameEn}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Product Grid: Strict 2 columns on mobile, 3 on tablet, 4 on desktop, 5 on wide screens */}
       {loading ? (
@@ -231,7 +330,7 @@ export const ProductGrid: React.FC = () => {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-12 pb-4">
+        <div className="flex items-center justify-center gap-2 pt-12 pb-4 flex-wrap max-w-full px-2">
           <button
             id="btn-prev-page"
             disabled={page === 1}
@@ -239,12 +338,12 @@ export const ProductGrid: React.FC = () => {
               setPage((p) => Math.max(1, p - 1));
               document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="p-2.5 rounded-full border border-[#e0e0e0] disabled:opacity-20 hover:bg-[#f8f9fa]/10 text-[#111111] transition-all cursor-pointer"
+            className="p-2.5 rounded-full border border-[#e0e0e0] disabled:opacity-20 hover:bg-[#f8f9fa]/10 text-[#111111] transition-all cursor-pointer shrink-0"
           >
             {isAr ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-center flex-wrap gap-1.5 max-w-full">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pNum) => (
               <button
                 key={pNum}
@@ -252,7 +351,7 @@ export const ProductGrid: React.FC = () => {
                   setPage(pNum);
                   document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className={`w-8 h-8 rounded-full text-xs font-mono font-bold transition-all cursor-pointer ${
+                className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-mono font-bold transition-all cursor-pointer shrink-0 ${
                   page === pNum
                     ? 'bg-[#111111] text-white shadow-md border border-[#e0e0e0]'
                     : 'hover:bg-[#f8f9fa]/10 text-neutral-500 hover:text-[#111111] border border-transparent'
@@ -270,7 +369,7 @@ export const ProductGrid: React.FC = () => {
               setPage((p) => Math.min(totalPages, p + 1));
               document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="p-2.5 rounded-full border border-[#e0e0e0] disabled:opacity-20 hover:bg-[#f8f9fa]/10 text-[#111111] transition-all cursor-pointer"
+            className="p-2.5 rounded-full border border-[#e0e0e0] disabled:opacity-20 hover:bg-[#f8f9fa]/10 text-[#111111] transition-all cursor-pointer shrink-0"
           >
             {isAr ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           </button>

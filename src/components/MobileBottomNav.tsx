@@ -9,6 +9,7 @@ import {
   X,
 } from 'lucide-react';
 import { MainCategory } from '../types.js';
+import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss.js';
 
 export const MobileBottomNav: React.FC = () => {
   const {
@@ -27,6 +28,7 @@ export const MobileBottomNav: React.FC = () => {
   const isAr = language === 'ar';
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const totalCartItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const { touchHandlers: catTouchHandlers, style: catSheetStyle } = useSwipeToDismiss(() => setShowCategorySheet(false));
 
   const handleHomeClick = () => {
     setIsClearanceView(false);
@@ -58,15 +60,25 @@ export const MobileBottomNav: React.FC = () => {
       {showCategorySheet && (
         <div
           id="mobile-cat-sheet-overlay"
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:hidden animate-fade-in"
+          className="modal-backdrop-overlay bg-black/50 backdrop-blur-sm sm:hidden animate-fade-in"
           onClick={() => setShowCategorySheet(false)}
         >
           <div
             id="mobile-cat-sheet"
             onClick={(e) => e.stopPropagation()}
-            className="w-full bg-[#f8f9fa] text-[#111111] border-t border-[#e0e0e0] rounded-t-3xl p-5 space-y-4 max-h-[80vh] overflow-y-auto animate-slide-up-sheet pb-20 no-scrollbar"
+            style={catSheetStyle}
+            className="modal-content-wrapper modal-body-scroll w-full bg-[#f8f9fa] text-[#111111] border-t border-[#e0e0e0] rounded-t-3xl p-5 space-y-4 animate-slide-up-sheet pb-20 no-scrollbar flex flex-col"
           >
-            <div className="w-12 h-1.5 bg-neutral-700 rounded-full mx-auto" />
+            {/* Interactive Top Drag Handle */}
+            <div 
+              className="w-full flex justify-center items-center pt-1 pb-2 cursor-pointer select-none touch-none hover:opacity-80 transition-opacity"
+              onClick={() => setShowCategorySheet(false)}
+              role="button"
+              aria-label={isAr ? 'إغلاق الأقسام' : 'Close departments'}
+              {...catTouchHandlers}
+            >
+              <div className="w-12 h-1.5 bg-neutral-400 hover:bg-neutral-600 rounded-full transition-colors pointer-events-none" />
+            </div>
             <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
               <h3 className="font-luxury font-bold text-base text-[#111111]">
                 {isAr ? 'أقسام متجر حكاية' : 'HKAYA Departments'}
